@@ -22,7 +22,12 @@ N = len(lines)
 n = int(log2(N))
 m = len(lines[0]) - 1
 
-print(N, n, m)
+u = int(log(N,10)) + 1
+v = int(log(n,10)) + 1
+w = int(log(m,10)) + 1
+
+
+print(N, n, m, u, w, v)
 
 for i in range(N):
     lines[i] = lines[i][:-1]
@@ -45,15 +50,21 @@ with open(moduleName+'.v', 'wt') as fout:
         width = len(pterm)
         if width < n:
             pterm = '0'*(n-width)+pterm
-        print('assign P[%2d] = ' % (i), end='', file=fout)
+        print('assign P[%*d] = ' % (u, i), end='', file=fout)
+        lineLen = 19
         for j in range(n):
             idx = n - j - 1
             if pterm[idx] == '1':
-                print(' A[%d]' % j, end='', file=fout)
+                print(' A[%*d]' % (v, j), end='', file=fout)
             else:
-                print('~A[%d]' % j, end='', file=fout)
+                print('~A[%*d]' % (v, j), end='', file=fout)
+            lineLen += 4 + v
             if j < (n - 1):
                 print(' & ', end='', file=fout)
+                lineLen += 3
+            if lineLen > 72:
+                print('\n', ' '*15, end='', file=fout)
+                lineLen = 19
         print(';', file=fout)
     print(file=fout)
     print('always @(posedge Clk)', file=fout)
@@ -75,13 +86,13 @@ with open(moduleName+'.v', 'wt') as fout:
     for j in range(m):
         K = len(Q[j])
         if K == 0:
-            print(' '*7, 'Q[%2d] <= #1 0;' %(j), file=fout)
+            print(' '*7, 'Q[%*d] <= #1 0;' %(w, j), file=fout)
         else:
             lineLen = 19
-            print(' '*7, 'Q[%2d] <= #1 ' % (j), end='', file=fout)
+            print(' '*7, 'Q[%*d] <= #1 ' % (w, j), end='', file=fout)
             for k in range(K):
-                print('P[%2d]' % (Q[j][k]), end='', file=fout)
-                lineLen += 5
+                print('P[%*d]' % (u, Q[j][k]), end='', file=fout)
+                lineLen += 3 + u
                 if k < K - 1:
                     print(' | ', end='', file=fout)
                     lineLen += 3
